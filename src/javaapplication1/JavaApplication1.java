@@ -63,6 +63,10 @@ class Surface extends JPanel implements ActionListener {
     Random r = new Random();
     //bumping player
     int bump=0;
+    //delay between obsticals
+    int del_obs=50;
+    //last obstical
+    int last=0;
 
     public Surface() {
 
@@ -72,36 +76,42 @@ class Surface extends JPanel implements ActionListener {
         this.addKeyListener(new KeyListener(){
             @Override
             public void keyPressed(KeyEvent evt) {
+                if(evt.getKeyCode()== KeyEvent.VK_SPACE)
+                {
                 if(key_time==0)
                 key_time=time;
+                }
             }
  
             @Override
             public void keyReleased(KeyEvent evt) {
-                if (time-key_time<10)
+                if(evt.getKeyCode()== KeyEvent.VK_SPACE)
                 {
-                    short_stroke();
+                    if (time-key_time<10)
+                    {
+                        short_stroke();
+                        key_time=0;
+                    }
+                    else if(time-key_time<25&&anim_type==0)
+                    {
+                        if(points>0)
+                        {
+                            points-=1;
+                            anim_type=2;
+                            anim_time=0;
+                        }
+                    }
+                    else if(time-key_time>=25&&anim_type==0)
+                    {
+                        if(points>2)
+                        {
+                            points-=3;
+                            anim_time=25;
+                            anim_type=1;
+                        }
+                    }
                     key_time=0;
                 }
-                else if(time-key_time<25&&anim_type==0)
-                {
-                    if(points>0)
-                    {
-                        points-=1;
-                        anim_type=2;
-                        anim_time=0;
-                    }
-                }
-                else if(time-key_time>=25&&anim_type==0)
-                {
-                    if(points>2)
-                    {
-                        points-=3;
-                        anim_time=25;
-                        anim_type=1;
-                    }
-                }
-                key_time=0;
             }
  
             @Override
@@ -129,6 +139,7 @@ class Surface extends JPanel implements ActionListener {
         points=3;
         anim_type=0;
         anim_time=0;
+        del_obs=50;
     }
     //if menu is active starts game, else jump
     private void short_stroke()
@@ -176,10 +187,18 @@ class Surface extends JPanel implements ActionListener {
             }
             
             //creating obsticals
-            if(time%50==0)
+            if(time%del_obs==0)
             {
-                block.add(new int[]{800,(r.nextInt(150))+150});
+                int i = (r.nextInt(250))+50;
+                if(last>115&&i>115)i-=125;
+                block.add(new int[]{1200,i});
+                last=i;
             }
+            if(time%500==0)
+            {
+                if(time>10)del_obs--;
+            }
+            
             //delete passed obsticals
             if(time%1000==0)
             {
@@ -384,7 +403,7 @@ public class JavaApplication1 extends JFrame{
         });
 
         setTitle("Simple game");
-        setSize(800, 600);
+        setSize(1200, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
     }
